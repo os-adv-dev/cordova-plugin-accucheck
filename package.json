@@ -10,7 +10,8 @@
     ]
   },
   "keywords": [
-    "ecosystem:cordova"
+    "ecosystem:cordova",
+    "cordova-android"
   ],
   "author": "Paulo Cesar Camilo - OutSystems Experts Mobile",
   "license": "ISC",

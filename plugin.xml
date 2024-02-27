@@ -12,26 +12,25 @@
     <!-- Android section -->
     <platform name="android">
         
-        <config-file parent="/*" target="res/xml/config.xml">
+        <config-file target="config.xml" parent="/*">
+
+            <preference name="GradlePluginKotlinEnabled" value="true" />
+            <preference name="GradlePluginKotlinVersion" value="1.6.20" />
+            <preference name="GradlePluginKotlinCodeStyle" value="official" />
+            <preference name="AndroidXEnabled" value="true"/>
+
             <feature name="AccuCheckPlugin">
                 <param name="android-package" value="com.outsystems.experts.accucheck.AccuCheckPlugin" />
             </feature>
         </config-file>
 
         <config-file parent="/*" target="AndroidManifest.xml" />
-        <source-file src="src/android/AccuCheckPlugin.kt" target-dir="app/src/main/kotlin/com/outsystems/experts/accucheck/" />
+        <source-file src="src/android/AccuCheckPlugin.kt" target-dir="java/com/outsystems/experts/accucheck/" />
          
         <!-- SDK Files -->
         <framework src="src/android/build.gradle" custom="true" type="gradleReference" />
         <!-- END SDK Files -->
 
-        <!-- Edit config.xml -->
-        <config-file target="res/xml/config.xml" parent="/*">
-			<preference name="GradlePluginKotlinVersion" value="1.6.0" />
-			<preference name="GradlePluginKotlinEnabled" value="true" />
-            <preference name="GradlePluginKotlinCodeStyle" value="official" />
-            <preference name="AndroidXEnabled" value="true"/>
-        </config-file>
     </platform>
 
     <!-- iOS section -->

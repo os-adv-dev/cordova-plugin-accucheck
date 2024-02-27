@@ -1,5 +1,6 @@
 package com.outsystems.experts.accucheck
 
+import android.widget.Toast
 import org.apache.cordova.CallbackContext
 import org.apache.cordova.CordovaInterface
 import org.apache.cordova.CordovaPlugin
@@ -24,20 +25,34 @@ class AccuCheckPlugin : CordovaPlugin() {
         args: JSONArray,
         callbackContext: CallbackContext
     ): Boolean {
-
+   
         if (action == START_SCAN) {
+            this.startScan(callbackContext)
             return true
         }
 
         if (action == CONNECT_DEVICE) {
+            this.connectDevice(callbackContext)
             return true
         }
 
         if (action == READ_DATA) {
+            this.readData(callbackContext)
             return true
         }
 
         return false
     }
 
+    private fun startScan(callbackContext: CallbackContext) {
+        callbackContext.success()
+    }
+
+    private fun connectDevice(callbackContext: CallbackContext) {
+        callbackContext.success()
+    }
+
+    private fun readData(callbackContext: CallbackContext) {
+        callbackContext.success()
+    }
 }
