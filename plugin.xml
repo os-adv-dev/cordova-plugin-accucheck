@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='utf-8'?>
+<plugin id="com.outsystems.experts.accucheck" version="1.0.0"
+    xmlns="http://apache.org/cordova/ns/plugins/1.0"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <name>Accu-Check Plugin</name>
+    
+    <js-module name="AccuCheckPlugin" src="www/AccuCheckPlugin.js">
+        <clobbers target="cordova.plugins.AccuCheckPlugin" />
+    </js-module>
+    
+    <platform name="android">
+        
+        <config-file parent="/*" target="res/xml/config.xml">
+            <feature name="AccuCheckPlugin">
+                <param name="android-package" value="com.outsystems.experts.accucheck.AccuCheckPlugin" />
+            </feature>
+        </config-file>
+
+        <config-file parent="/*" target="AndroidManifest.xml" />
+        <source-file src="src/android/AccuCheckPlugin.kt" target-dir="app/src/main/kotlin/com/outsystems/experts/samsungpay/" />
+         
+        <!-- SDK Files -->
+        <framework src="src/android/build.gradle" custom="true" type="gradleReference" />
+        <!-- END SDK Files -->
+
+        <!-- Edit config.xml -->
+        <config-file target="res/xml/config.xml" parent="/*">
+			<preference name="GradlePluginKotlinVersion" value="1.6.0" />
+			<preference name="GradlePluginKotlinEnabled" value="true" />
+            <preference name="GradlePluginKotlinCodeStyle" value="official" />
+            <preference name="AndroidXEnabled" value="true"/>
+        </config-file>
+    </platform>
+
+</plugin>

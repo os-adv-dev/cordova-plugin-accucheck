@@ -1,0 +1,20 @@
+{
+  "name": "Accu-Check Plugin",
+  "version": "1.0.0",
+  "description": "Integration Guide for exchanging data with Roche Accu-Chek",
+  "cordova": {
+    "id": "com.outsystems.experts.accucheck",
+    "platforms": [
+      "android",
+      "ios"
+    ]
+  },
+  "keywords": [
+    "ecosystem:cordova"
+  ],
+  "author": "Paulo Cesar Camilo - OutSystems Experts Mobile",
+  "license": "ISC",
+  "dependencies": {
+    "xml2js": "^0.6.2"
+  }
+}
