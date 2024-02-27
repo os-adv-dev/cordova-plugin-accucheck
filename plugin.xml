@@ -3,12 +3,13 @@
     xmlns="http://apache.org/cordova/ns/plugins/1.0"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <name>Accu-Check Plugin</name>
+    <name>Accu Check Plugin</name>
     
     <js-module name="AccuCheckPlugin" src="www/AccuCheckPlugin.js">
         <clobbers target="cordova.plugins.AccuCheckPlugin" />
     </js-module>
     
+    <!-- Android section -->
     <platform name="android">
         
         <config-file parent="/*" target="res/xml/config.xml">
@@ -18,7 +19,7 @@
         </config-file>
 
         <config-file parent="/*" target="AndroidManifest.xml" />
-        <source-file src="src/android/AccuCheckPlugin.kt" target-dir="app/src/main/kotlin/com/outsystems/experts/samsungpay/" />
+        <source-file src="src/android/AccuCheckPlugin.kt" target-dir="app/src/main/kotlin/com/outsystems/experts/accucheck/" />
          
         <!-- SDK Files -->
         <framework src="src/android/build.gradle" custom="true" type="gradleReference" />
@@ -33,7 +34,7 @@
         </config-file>
     </platform>
 
-    <!-- Ios section -->
+    <!-- iOS section -->
     <platform name="ios">
         <config-file target="config.xml" parent="/*">
             <feature name="AccuCheckPlugin">

@@ -1,5 +1,5 @@
 {
-  "name": "Accu-Check Plugin",
+  "name": "AccuCheckPlugin",
   "version": "1.0.0",
   "description": "Integration Guide for exchanging data with Roche Accu-Chek",
   "cordova": {
