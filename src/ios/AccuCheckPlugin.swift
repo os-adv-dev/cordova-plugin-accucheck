@@ -1,49 +1,37 @@
 import Foundation
-import Cordova
 
 private let TAG = "AccuCheckPlugin"
 private let START_SCAN = "startScan"
 private let CONNECT_DEVICE = "connectDevice"
 private let READ_DATA = "readData"
 
-@objc(AccuCheckPlugin) class AccuCheckPlugin: CDVPlugin {
+@objc(AccuCheckPlugin)
+class AccuCheckPlugin: CDVPlugin {
     
     override func pluginInitialize() {
         super.pluginInitialize()
         // Initialize the BlueCandy SDK
+        print("---- ✅ ---- pluginInitialize ---- ✅ ----")
     }
     
-    @objc(execute:)
-    func execute(command: CDVInvokedUrlCommand) -> Bool {
-        let action = command.methodName
-        
-        if action == START_SCAN {
-            self.startScan(command)
-            return true
-        }
-        
-        if action == CONNECT_DEVICE {
-            self.connectDevice(command)
-            return true
-        }
-        
-        if action == READ_DATA {
-            self.readData(command)
-            return true
-        }
-        
-        return false
-    }
-    
+    @objc(startScan:)
     func startScan(_ command: CDVInvokedUrlCommand) {
-       
+        let pluginResult = CDVPluginResult(status: CDVCommandStatus_OK, messageAs: "Scan OK")
+        print("---- ✅ ---- startScan ---- ✅ ----")
+        self.commandDelegate.send(pluginResult, callbackId: command.callbackId)
     }
     
+    @objc(connectDevice:)
     func connectDevice(_ command: CDVInvokedUrlCommand) {
-       
+        let pluginResult = CDVPluginResult(status: CDVCommandStatus_OK, messageAs: "Connect Device OK")
+        print("---- ✅ ---- connectDevice ---- ✅ ----")
+        self.commandDelegate.send(pluginResult, callbackId: command.callbackId)
     }
     
+    @objc(readData:)
     func readData(_ command: CDVInvokedUrlCommand) {
-       
+        let pluginResult = CDVPluginResult(status: CDVCommandStatus_OK, messageAs: "Read Data OK")
+        print("---- ✅ ---- readData ---- ✅ ----")
+        self.commandDelegate.send(pluginResult, callbackId: command.callbackId)
     }
 }

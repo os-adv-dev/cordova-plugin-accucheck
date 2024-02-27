@@ -38,6 +38,7 @@
         <config-file target="config.xml" parent="/*">
             <feature name="AccuCheckPlugin">
                 <param name="ios-package" value="AccuCheckPlugin" />
+                <param name="onload" value="true" />
             </feature>
         </config-file>
         <source-file src="src/ios/AccuCheckPlugin.swift" />
