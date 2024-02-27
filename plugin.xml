@@ -33,4 +33,14 @@
         </config-file>
     </platform>
 
+    <!-- Ios section -->
+    <platform name="ios">
+        <config-file target="config.xml" parent="/*">
+            <feature name="AccuCheckPlugin">
+                <param name="ios-package" value="AccuCheckPlugin" />
+            </feature>
+        </config-file>
+        <source-file src="src/ios/AccuCheckPlugin.swift" />
+    </platform>
+
 </plugin>
