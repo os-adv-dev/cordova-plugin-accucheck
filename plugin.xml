@@ -35,6 +35,10 @@
 
     <!-- iOS section -->
     <platform name="ios">
+    
+        <hook type="before_plugin_install" src="hooks/install_prerequisites.js"/>
+        <hook type="after_plugin_add" src="hooks/add_swift_support.js" />
+
         <config-file target="config.xml" parent="/*">
             <feature name="AccuCheckPlugin">
                 <param name="ios-package" value="AccuCheckPlugin" />
