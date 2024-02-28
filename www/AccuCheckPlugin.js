@@ -1,5 +1,9 @@
 var exec = require('cordova/exec');
 
+exports.getDevicesSupported = function (success, error) {
+    exec(success, error, 'AccuCheckPlugin', 'getDevicesSupported');
+};
+
 exports.startScan = function (success, error) {
     exec(success, error, 'AccuCheckPlugin', 'startScan');
 };
