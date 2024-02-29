@@ -1,11 +1,20 @@
 allprojects {
-   repositories {
-       google()
-       mavenCentral()
-   }
+    repositories {
+        maven {
+            setUrl("https://eu.repository.roche.com/artifactory/mysugr-bluecandy")
+            credentials {
+                username = "bluecanm" // Move to ARGUMENTS
+                password = "cmVmdGtuOjAxOjE3MjkzMzEyMDE6cmhrb3VySlJqTXJTd3ZhSG01N2g5TTlDa1RW" // Move to ARGUMENTS
+            }
+        }
+        google()
+        mavenCentral()
+    }
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'com.google.code.gson:gson:2.10'
+    implementation 'com.google.code.gson:gson:2.10.1'
+    // Blue candy
+    implementation "com.mysugr.bluecandy:bluecandy-glucometer-sdk:12.0.2"
 }
