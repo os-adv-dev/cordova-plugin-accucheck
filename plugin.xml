@@ -32,9 +32,11 @@
         <!-- END SDK Files -->
 
         <!-- Accu-Check Permissions -->
-        <uses-permission android:name="android.permission.BLUETOOTH_SCAN" android:usesPermissionFlags="neverForLocation" tools:targetApi="s" />
-        <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
-        <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
+         <config-file target="AndroidManifest.xml" parent="/*">
+            <uses-permission android:name="android.permission.BLUETOOTH_SCAN" android:usesPermissionFlags="neverForLocation" tools:targetApi="s" />
+            <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+            <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
+        </config-file>
 
     </platform>
 
