@@ -139,6 +139,8 @@ class AccuCheckPlugin : CordovaPlugin() {
             val deviceType = DeviceType(name = name, id = id, bluetoothId = bluetoothId)
 
             genericLeScanner?.start(deviceType)
+
+            this.startScanCallbackContext.success()
         } catch (exception: BluetoothOffException) {
             Toast.makeText(cordova.context, TURN_ON_BLUETOOTH_ERROR, Toast.LENGTH_LONG).show()
             this.startScanCallbackContext.error(TURN_ON_BLUETOOTH_ERROR)
