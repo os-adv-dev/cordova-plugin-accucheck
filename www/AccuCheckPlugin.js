@@ -8,6 +8,10 @@ exports.startScan = function (success, error, args) {
     exec(success, error, 'AccuCheckPlugin', 'startScan',[args]);
 };
 
+exports.scanDeviceListener = function (success, error, args) {
+    exec(success, error, 'AccuCheckPlugin', 'scanDeviceListener',[args]);
+};
+
 exports.stopScan = function (success, error, args) {
     exec(success, error, 'AccuCheckPlugin', 'stopScan', [args]);
 };
