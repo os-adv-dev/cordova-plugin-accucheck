@@ -12,6 +12,14 @@ exports.scanDeviceListener = function (success, error) {
     exec(success, error, 'AccuCheckPlugin', 'scanDeviceListener');
 };
 
+exports.deviceInfoListener = function (success, error) {
+    exec(success, error, 'AccuCheckPlugin', 'deviceInfoListener');
+};
+
+exports.glucoseMeasurementsListener = function (success, error) {
+    exec(success, error, 'AccuCheckPlugin', 'glucoseMeasurementsListener');
+};
+
 exports.stopScan = function (success, error, args) {
     exec(success, error, 'AccuCheckPlugin', 'stopScan', [args]);
 };
