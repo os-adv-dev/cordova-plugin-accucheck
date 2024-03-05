@@ -63,6 +63,14 @@ data class MeasurementData(
     val glucoseReadingMeal: String?
 )
 
+data class Info(
+    val modelNumber: String?,
+    val firmwareRevision: String?,
+    val serialNumber: String?,
+    val manufacturerName: String?,
+    val manufacturerId: String?
+)
+
 class AccuCheckPlugin : CordovaPlugin(), OnGlucometerControllerCreated {
 
     private var genericLeScanner: LeScanningManager? = null
@@ -389,14 +397,15 @@ class AccuCheckPlugin : CordovaPlugin(), OnGlucometerControllerCreated {
     private fun readDeviceInformation(glucometerController: GlucometerController) {
         glucometerController.readDeviceInfo(
             { deviceInfo ->
-                val result = JSONObject().apply {
-                    put("modelNumber", deviceInfo.modelNumber)
-                    put("firmwareRevision", deviceInfo.firmwareRevision)
-                    put("serialNumber", deviceInfo.serialNumber)
-                    put("manufacturerName", deviceInfo.manufacturerName)
-                    put("manufacturerId", deviceInfo.reversedSystemId?.manufacturerId ?: "")
-                }
+                val info = Info(
+                    modelNumber= deviceInfo.modelNumber,
+                    firmwareRevision = deviceInfo.firmwareRevision,
+                    serialNumber = deviceInfo.serialNumber,
+                    manufacturerName = deviceInfo.manufacturerName,
+                    manufacturerId = "${deviceInfo.reversedSystemId?.manufacturerId}"
+                )
                 Log.v(TAG, "----- readDeviceInfo $deviceInfo")
+                val result = JSONObject().apply { put("info", info) }
                 val pluginResult = PluginResult(PluginResult.Status.OK, result)
                 pluginResult.keepCallback = true
                 if (this::deviceInformationCallback.isInitialized) {
