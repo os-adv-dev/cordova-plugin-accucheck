@@ -42,6 +42,8 @@ private const val GLUCOSE_MEASUREMENTS_LISTENER = "glucoseMeasurementsListener"
 private const val STOP_SCAN = "stopScan"
 private const val CONNECT_DEVICE = "connectDevice"
 private const val READ_DATA = "readData"
+private const val DISCONNECT_DEVICES = "disconnectDevice"
+private const val DISCONNECT_ALL_DEVICES = "disconnectAllDevices"
 
 // Errors
 private const val ERROR_NO_DEVICES_SUPPORTED = "No devices supported!"
@@ -53,7 +55,6 @@ private const val ERROR_TO_CONNECT_NOT_FOUND =
     "This device is not found near you to connect, try again"
 
 data class MeasurementData(
-    val measurementInMgDL: String?,
     val glucoseReadingValue: String?,
     val glucoseReadingValueUnit: String?,
     val glucoseSequenceNumber: String?,
@@ -81,8 +82,9 @@ class AccuCheckPlugin : CordovaPlugin(), OnGlucometerControllerCreated {
     private val scanResults = mutableListOf<ScanResultItem>()
 
     private var glucometerController: GlucometerController? = null
+    private var deviceConnectionController: DeviceConnectionController? = null
 
-    // Listeners to Device Information
+        // Listeners to Device Information
     private lateinit var deviceInformationCallback: CallbackContext
     private lateinit var glucoseMeasurementsCallback: CallbackContext
 
@@ -141,7 +143,38 @@ class AccuCheckPlugin : CordovaPlugin(), OnGlucometerControllerCreated {
             return true
         }
 
+        if (action == DISCONNECT_DEVICES) {
+            this.disconnectDevices(callbackContext, args)
+            return true
+        }
+
+        if (action == DISCONNECT_ALL_DEVICES) {
+            this.disconnectAllDevices(callbackContext)
+            return true
+        }
+
         return false
+    }
+
+    private fun disconnectDevices(callbackContext: CallbackContext, args: JSONArray) {
+        try {
+            val address = args.getString(0)
+            if (address != null) {
+                deviceConnectionController?.disconnect(address)
+            }
+            callbackContext.success()
+        } catch (ex: Exception) {
+            callbackContext.error(ex.message)
+        }
+    }
+
+    private fun disconnectAllDevices(callbackContext: CallbackContext) {
+        try {
+            deviceConnectionController?.disconnectAll()
+            callbackContext.success()
+        } catch (ex: Exception) {
+            callbackContext.error(ex.message)
+        }
     }
 
     private fun getDevicesSupported(callbackContext: CallbackContext) {
@@ -310,10 +343,9 @@ class AccuCheckPlugin : CordovaPlugin(), OnGlucometerControllerCreated {
     }
 
     private fun registerDeviceConnectCallback(data: SerializableDevice) {
-        val deviceConnectionController = DeviceConnectionController(this)
-
-        deviceConnectionController.connect(data.deviceInfo)
-        deviceConnectionController.let { controller ->
+        deviceConnectionController = DeviceConnectionController(this)
+        deviceConnectionController?.connect(data.deviceInfo)
+        deviceConnectionController?.let { controller ->
             controller.onError = { errorMessage ->
                 this.connectDeviceCallback.error(errorMessage)
             }
@@ -397,16 +429,15 @@ class AccuCheckPlugin : CordovaPlugin(), OnGlucometerControllerCreated {
     private fun readDeviceInformation(glucometerController: GlucometerController) {
         glucometerController.readDeviceInfo(
             { deviceInfo ->
-                val info = Info(
-                    modelNumber= deviceInfo.modelNumber,
-                    firmwareRevision = deviceInfo.firmwareRevision,
-                    serialNumber = deviceInfo.serialNumber,
-                    manufacturerName = deviceInfo.manufacturerName,
-                    manufacturerId = "${deviceInfo.reversedSystemId?.manufacturerId}"
-                )
+                val data = JSONObject().apply {
+                    put("modelNumber",deviceInfo.modelNumber)
+                    put("firmwareRevision",deviceInfo.firmwareRevision)
+                    put("serialNumber",deviceInfo.serialNumber)
+                    put("manufacturerName",deviceInfo.manufacturerName)
+                    put("manufacturerId", "${deviceInfo.reversedSystemId?.manufacturerId}")
+                }
                 Log.v(TAG, "----- readDeviceInfo $deviceInfo")
-                val result = JSONObject().apply { put("info", info) }
-                val pluginResult = PluginResult(PluginResult.Status.OK, result)
+                val pluginResult = PluginResult(PluginResult.Status.OK, data)
                 pluginResult.keepCallback = true
                 if (this::deviceInformationCallback.isInitialized) {
                     this.deviceInformationCallback.sendPluginResult(pluginResult)
@@ -443,7 +474,6 @@ class AccuCheckPlugin : CordovaPlugin(), OnGlucometerControllerCreated {
             }
             val glucoseReadingMeal = "${glucose.context?.meal?.getIconString()} ${glucose.context?.meal?.name?.getUserFriendlyString()}"
             val model = MeasurementData(
-                measurementInMgDL = measurementInMgDL?.formattedToString(),
                 glucoseReadingValue = glucoseReadingValue,
                 glucoseReadingValueUnit = glucoseReadingValueUnit,
                 glucoseSequenceNumber = "$glucoseSequenceNumber",
@@ -454,7 +484,7 @@ class AccuCheckPlugin : CordovaPlugin(), OnGlucometerControllerCreated {
             )
             list.add(model)
         }
-
+        println("Data List >>>> ${list.toArray()}")
         return list
     }
 

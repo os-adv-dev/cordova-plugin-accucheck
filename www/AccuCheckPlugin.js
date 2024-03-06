@@ -16,6 +16,14 @@ exports.deviceInfoListener = function (success, error) {
     exec(success, error, 'AccuCheckPlugin', 'deviceInfoListener');
 };
 
+exports.disconnectDevice = function (success, error, address) {
+    exec(success, error, 'AccuCheckPlugin', 'disconnectDevice', address);
+};
+
+exports.disconnectAllDevices = function (success, error) {
+    exec(success, error, 'AccuCheckPlugin', 'disconnectAllDevices');
+};
+
 exports.glucoseMeasurementsListener = function (success, error) {
     exec(success, error, 'AccuCheckPlugin', 'glucoseMeasurementsListener');
 };
