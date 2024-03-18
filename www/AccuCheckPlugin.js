@@ -17,11 +17,15 @@ exports.deviceInfoListener = function (success, error) {
 };
 
 exports.disconnectDevice = function (success, error, address) {
-    exec(success, error, 'AccuCheckPlugin', 'disconnectDevice', address);
+    exec(success, error, 'AccuCheckPlugin', 'disconnectDevice', [address]);
 };
 
 exports.disconnectAllDevices = function (success, error) {
     exec(success, error, 'AccuCheckPlugin', 'disconnectAllDevices');
+};
+
+exports.stopConnectDevice = function (success, error) {
+    exec(success, error, 'AccuCheckPlugin', 'stopConnectDevice');
 };
 
 exports.glucoseMeasurementsListener = function (success, error) {

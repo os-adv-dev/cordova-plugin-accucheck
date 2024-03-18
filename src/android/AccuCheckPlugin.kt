@@ -2,9 +2,12 @@ package com.outsystems.experts.accucheck
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.pm.PackageManager
+import android.os.Build
 import android.util.Log
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import com.google.gson.Gson
 import com.mysugr.bluecandy.api.BluetoothDevice
 import com.mysugr.bluecandy.api.BluetoothDeviceInfo
@@ -41,6 +44,7 @@ private const val DEVICE_INFO_LISTENER = "deviceInfoListener"
 private const val GLUCOSE_MEASUREMENTS_LISTENER = "glucoseMeasurementsListener"
 private const val STOP_SCAN = "stopScan"
 private const val CONNECT_DEVICE = "connectDevice"
+private const val STOP_CONNECT_DEVICE = "stopConnectDevice"
 private const val READ_DATA = "readData"
 private const val DISCONNECT_DEVICES = "disconnectDevice"
 private const val DISCONNECT_ALL_DEVICES = "disconnectAllDevices"
@@ -84,17 +88,17 @@ class AccuCheckPlugin : CordovaPlugin(), OnGlucometerControllerCreated {
     private var glucometerController: GlucometerController? = null
     private var deviceConnectionController: DeviceConnectionController? = null
 
-        // Listeners to Device Information
+    // Listeners to Device Information
     private lateinit var deviceInformationCallback: CallbackContext
     private lateinit var glucoseMeasurementsCallback: CallbackContext
+
+    private var dialog: AlertDialog? = null
 
     override fun initialize(cordova: CordovaInterface?, webView: CordovaWebView?) {
         super.initialize(cordova, webView)
         if (cordova?.context != null) {
             InitializationManager(cordova.context)
         }
-
-        genericLeScanner = LeScanningManager()
     }
 
     override fun execute(
@@ -130,6 +134,10 @@ class AccuCheckPlugin : CordovaPlugin(), OnGlucometerControllerCreated {
             this.connectDevice(args)
             return true
         }
+        if (action == STOP_CONNECT_DEVICE) {
+            this.stopConnectDevice(callbackContext)
+            return true
+        }
         if (action == DEVICE_INFO_LISTENER) {
             this.deviceInformationCallback = callbackContext
             return true
@@ -156,11 +164,25 @@ class AccuCheckPlugin : CordovaPlugin(), OnGlucometerControllerCreated {
         return false
     }
 
+    private fun stopConnectDevice(callbackContext: CallbackContext) {
+        try {
+            deviceConnectionController?.disconnectAll()
+            genericLeScanner?.stop()
+            deviceConnectionController = null
+            glucometerController = null
+            callbackContext.success()
+        } catch (ex: Exception) {
+            callbackContext.error(ex.message)
+        }
+    }
+
     private fun disconnectDevices(callbackContext: CallbackContext, args: JSONArray) {
         try {
             val address = args.getString(0)
             if (address != null) {
                 deviceConnectionController?.disconnect(address)
+                genericLeScanner?.stop()
+                deviceConnectionController = null
             }
             callbackContext.success()
         } catch (ex: Exception) {
@@ -171,6 +193,8 @@ class AccuCheckPlugin : CordovaPlugin(), OnGlucometerControllerCreated {
     private fun disconnectAllDevices(callbackContext: CallbackContext) {
         try {
             deviceConnectionController?.disconnectAll()
+            genericLeScanner?.stop()
+            deviceConnectionController = null
             callbackContext.success()
         } catch (ex: Exception) {
             callbackContext.error(ex.message)
@@ -187,18 +211,16 @@ class AccuCheckPlugin : CordovaPlugin(), OnGlucometerControllerCreated {
     }
 
     private fun scanDeviceListener() {
+        genericLeScanner = LeScanningManager()
         genericLeScanner?.let { scanner ->
             scanner.onScanError = {
-                showPopup("❌ >>>> onScanError >>> ${it.message} ")
                 sendErrorToScanDevice(it.message.toString())
             }
 
             scanner.onScanStarted = {
-                showPopup( "✅ >>>> onScanStarted >>> ")
                 scanStarted()
             }
             scanner.onScanStopped = {
-                showPopup("✅ >>>> onScanStopped >>> ")
                 scanStopped()
             }
             scanner.onDeviceFound = { scanResultItem ->
@@ -216,6 +238,21 @@ class AccuCheckPlugin : CordovaPlugin(), OnGlucometerControllerCreated {
                 }
             }
         }
+    }
+
+    private fun createAndShowDialog(context: Context) {
+        val builder = AlertDialog.Builder(context)
+        builder.setTitle("Accu-Check Status")
+        builder.setMessage("Loading...")
+        builder.setPositiveButton(android.R.string.ok) { dialog, _ ->
+            dialog.dismiss()
+        }
+        dialog = builder.create()
+        dialog?.show()
+    }
+
+    private fun dismissDialog() {
+        dialog?.dismiss()
     }
 
     private fun startScan(args: JSONArray) {
@@ -237,7 +274,19 @@ class AccuCheckPlugin : CordovaPlugin(), OnGlucometerControllerCreated {
     }
 
     private fun hasAllPermissions(): Boolean {
-        for (permission in REQUIRED_PERMISSIONS) {
+        val requiredPermissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            arrayOf(
+                Manifest.permission.BLUETOOTH_SCAN,
+                Manifest.permission.BLUETOOTH_CONNECT
+            )
+        } else {
+            arrayOf(
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.BLUETOOTH,
+                Manifest.permission.BLUETOOTH_ADMIN
+            )
+        }
+        for (permission in requiredPermissions) {
             if (cordova.hasPermission(permission).not()) {
                 return false
             }
@@ -246,7 +295,19 @@ class AccuCheckPlugin : CordovaPlugin(), OnGlucometerControllerCreated {
     }
 
     private fun requestPermissionsStartScan() {
-        cordova.requestPermissions(this, REQUEST_PERMISSIONS, REQUIRED_PERMISSIONS)
+        val permissionsToRequest = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            arrayOf(
+                Manifest.permission.BLUETOOTH_SCAN,
+                Manifest.permission.BLUETOOTH_CONNECT
+            )
+        } else {
+            arrayOf(
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.BLUETOOTH,
+                Manifest.permission.BLUETOOTH_ADMIN
+            )
+        }
+        cordova.requestPermissions(this, REQUEST_PERMISSIONS, permissionsToRequest)
     }
 
     override fun onRequestPermissionResult(
@@ -272,6 +333,18 @@ class AccuCheckPlugin : CordovaPlugin(), OnGlucometerControllerCreated {
                 }
             }
         }
+    }
+
+    override fun onDestroy() {
+        try {
+            deviceConnectionController?.disconnectAll()
+            genericLeScanner?.stop()
+            deviceConnectionController = null
+            genericLeScanner = null
+        } catch (ex: Exception) {
+            Log.v(TAG, ex.message.toString())
+        }
+        super.onDestroy()
     }
 
     private fun sendErrorToScanDevice(error: String) {
@@ -313,7 +386,8 @@ class AccuCheckPlugin : CordovaPlugin(), OnGlucometerControllerCreated {
     private fun stopScan(callbackContext: CallbackContext) {
         if (genericLeScanner != null) {
             genericLeScanner?.stop()
-
+            deviceConnectionController = null
+            scanResults.clear()
         }
         callbackContext.success()
     }
@@ -359,17 +433,12 @@ class AccuCheckPlugin : CordovaPlugin(), OnGlucometerControllerCreated {
     private fun <T> sendSuccessResultArray(callbackContext: CallbackContext, data: List<T>) {
         val jsonResult = Gson().toJson(data)
         val result = PluginResult(PluginResult.Status.OK, jsonResult)
+        result.keepCallback = true
         callbackContext.sendPluginResult(result)
     }
 
     companion object {
         private const val REQUEST_PERMISSIONS = 1001
-
-        val REQUIRED_PERMISSIONS = arrayOf(
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.BLUETOOTH_SCAN,
-            Manifest.permission.BLUETOOTH_CONNECT
-        )
     }
 
     data class SerializableDevice(val name: String, val deviceInfo: BluetoothDeviceInfo) :
@@ -382,16 +451,19 @@ class AccuCheckPlugin : CordovaPlugin(), OnGlucometerControllerCreated {
     private fun BluetoothDevice.asSerializableDevice(): SerializableDevice =
         SerializableDevice(name, asDeviceInfo())
 
+
     override fun invoke(glucometer: GlucometerController) {
         glucometerController = glucometer
+        cordova.activity.runOnUiThread {
+            createAndShowDialog(cordova.activity)
+        }
 
         glucometer.onGlucometerReady = {
             readDeviceInformation(glucometer)
             readGlucoseMeasurements(glucometer)
-            showPopup("Glucometer ready")
         }
         glucometer.onGlucometerPaused = {
-            showPopup("Glucometer paused")
+            dismissDialog()
         }
     }
 
@@ -446,9 +518,11 @@ class AccuCheckPlugin : CordovaPlugin(), OnGlucometerControllerCreated {
             { error ->
                 val result = JSONObject().apply {
                     put("message", error.message.toString())
+                    put("isLoading", false)
                 }
                 val pluginResult = PluginResult(PluginResult.Status.ERROR, result)
                 pluginResult.keepCallback = true
+
                 if (this::deviceInformationCallback.isInitialized) {
                     this.deviceInformationCallback.sendPluginResult(pluginResult)
                 }
@@ -484,7 +558,6 @@ class AccuCheckPlugin : CordovaPlugin(), OnGlucometerControllerCreated {
             )
             list.add(model)
         }
-        println("Data List >>>> ${list.toArray()}")
         return list
     }
 
