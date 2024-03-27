@@ -3,8 +3,8 @@ allprojects {
         maven {
             setUrl("https://eu.repository.roche.com/artifactory/mysugr-bluecandy")
             credentials {
-                username = "bluecanm" // Move to ARGUMENTS
-                password = "cmVmdGtuOjAxOjE3MjkzMzEyMDE6cmhrb3VySlJqTXJTd3ZhSG01N2g5TTlDa1RW" // Move to ARGUMENTS
+                username = "USER_NAME_PLACEHOLDER"
+                password = "PASSWORD_PLACEHOLDER" 
             }
         }
         google()

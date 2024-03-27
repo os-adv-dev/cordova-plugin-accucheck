@@ -11,6 +11,9 @@
     
     <!-- Android section -->
     <platform name="android">
+
+        <preference name="ANDROID_MYSUGR_SDK_USERNAME"/>
+        <preference name="ANDROID_MYSUGR_SDK_PASSWORD"/>
         
         <config-file target="config.xml" parent="/*">
 
@@ -48,6 +51,8 @@
             <service android:name="com.mysugr.bluecandy.android.timesync.AndroidCurrentTimeService" />
         </config-file>
 
+        <hook type="after_plugin_install" src="hooks/setUserPasswordMysugSDK.js" />
+
     </platform>
 
     <!-- iOS section -->
@@ -63,11 +68,6 @@
             </feature>
         </config-file>
         <source-file src="src/ios/AccuCheckPlugin.swift" />
-
-        <!-- Lib Files from  -->
-        <source-file src="src/ios/AccuCheckPlugin.swift" />
-
-        <!-- End -->
     </platform>
 
 </plugin>

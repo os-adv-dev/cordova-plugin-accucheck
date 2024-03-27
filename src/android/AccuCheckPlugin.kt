@@ -2,12 +2,12 @@ package com.outsystems.experts.accucheck
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import com.google.gson.Gson
 import com.mysugr.bluecandy.api.BluetoothDevice
 import com.mysugr.bluecandy.api.BluetoothDeviceInfo
@@ -91,8 +91,6 @@ class AccuCheckPlugin : CordovaPlugin(), OnGlucometerControllerCreated {
     // Listeners to Device Information
     private lateinit var deviceInformationCallback: CallbackContext
     private lateinit var glucoseMeasurementsCallback: CallbackContext
-
-    private var dialog: AlertDialog? = null
 
     override fun initialize(cordova: CordovaInterface?, webView: CordovaWebView?) {
         super.initialize(cordova, webView)
@@ -238,21 +236,6 @@ class AccuCheckPlugin : CordovaPlugin(), OnGlucometerControllerCreated {
                 }
             }
         }
-    }
-
-    private fun createAndShowDialog(context: Context) {
-        val builder = AlertDialog.Builder(context)
-        builder.setTitle("Accu-Check Status")
-        builder.setMessage("Loading...")
-        builder.setPositiveButton(android.R.string.ok) { dialog, _ ->
-            dialog.dismiss()
-        }
-        dialog = builder.create()
-        dialog?.show()
-    }
-
-    private fun dismissDialog() {
-        dialog?.dismiss()
     }
 
     private fun startScan(args: JSONArray) {
@@ -421,6 +404,7 @@ class AccuCheckPlugin : CordovaPlugin(), OnGlucometerControllerCreated {
         deviceConnectionController?.connect(data.deviceInfo)
         deviceConnectionController?.let { controller ->
             controller.onError = { errorMessage ->
+                showPopup(errorMessage)
                 this.connectDeviceCallback.error(errorMessage)
             }
         }
@@ -454,16 +438,14 @@ class AccuCheckPlugin : CordovaPlugin(), OnGlucometerControllerCreated {
 
     override fun invoke(glucometer: GlucometerController) {
         glucometerController = glucometer
-        cordova.activity.runOnUiThread {
-            createAndShowDialog(cordova.activity)
-        }
 
         glucometer.onGlucometerReady = {
+            showPopup("Glucometer ready")
             readDeviceInformation(glucometer)
             readGlucoseMeasurements(glucometer)
         }
         glucometer.onGlucometerPaused = {
-            dismissDialog()
+            showPopup("Glucometer paused")
         }
     }
 
@@ -483,6 +465,13 @@ class AccuCheckPlugin : CordovaPlugin(), OnGlucometerControllerCreated {
                     } else {
                         val glucoseMeasurements = createMeasurementFormatted(measurementList)
                         sendSuccessResultArray(this.glucoseMeasurementsCallback, glucoseMeasurements)
+                    }
+
+                    val looper = Looper.myLooper()
+                    if (looper != null) {
+                        Handler(looper).postDelayed({
+                            showPopup("Sync Finished") }, 500
+                        )
                     }
                 }
             },
