@@ -1,9 +1,7 @@
 #!/usr/bin/env node
-
 const fs = require('fs');
 const path = require('path');
 const xml2js = require('xml2js');
-
 
 const args = process.argv
 var userName;
@@ -57,9 +55,6 @@ module.exports = function (context) {
             sdkUsername = variables.ANDROID_MYSUGR_SDK_USERNAME;
             sdkPassword = variables.ANDROID_MYSUGR_SDK_PASSWORD;
 
-            console.log(" --- ✅ -- sdkUsername: "+sdkUsername);
-            console.log(" --- ✅ -- sdkPassword: "+sdkPassword);
-
             if (!sdkUsername || !sdkPassword) {
                 throw new Error('SDK username and/or password preferences not found in config.xml');
             }
@@ -72,7 +67,6 @@ module.exports = function (context) {
             // Escreve de volta as alterações no arquivo gradle
             fs.writeFileSync(gradlePath, gradleData, 'utf-8');
             console.log('Updated AccuCheckSampleApp-build.gradle with actual SDK credentials.');
-            console.log("-- ✅ -- gradle updated content: "+gradleData);
         });
     });
 };

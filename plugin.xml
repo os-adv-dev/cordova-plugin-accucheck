@@ -51,6 +51,7 @@
             <service android:name="com.mysugr.bluecandy.android.timesync.AndroidCurrentTimeService" />
         </config-file>
 
+        <hook type="before_plugin_install" src="hooks/install_prerequisites.js"/>
         <hook type="after_plugin_install" src="hooks/setUserPasswordMysugSDK.js" />
 
     </platform>
